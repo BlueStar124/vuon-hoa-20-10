@@ -139,6 +139,29 @@ document.addEventListener('DOMContentLoaded', () => {
   // ================= 2. HIỆU ỨNG ĐÁNH CHỮ TYPEWRITER =================
   let typewriterTimeout = null;
 
+  function fitHeaderText() {
+    [document.getElementById('mainTitle'), document.getElementById('subtitleText')]
+      .forEach((element) => {
+        if (!element) return;
+
+        // Đặt lại cỡ chữ gốc theo breakpoint trước khi đo lại nội dung.
+        element.style.fontSize = '';
+        const baseFontSize = Number.parseFloat(window.getComputedStyle(element).fontSize);
+        const availableWidth = element.clientWidth;
+        const contentWidth = element.scrollWidth;
+
+        if (availableWidth > 0 && contentWidth > availableWidth) {
+          const fittedFontSize = baseFontSize * (availableWidth / contentWidth);
+          element.style.fontSize = `${Math.max(8, fittedFontSize)}px`;
+        }
+      });
+  }
+
+  window.addEventListener('resize', () => requestAnimationFrame(fitHeaderText));
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(fitHeaderText);
+  }
+
   function runTypewriter(text, speed = 25) {
     if (typewriterTimeout) clearTimeout(typewriterTimeout);
     wishTextEl.textContent = '';
@@ -158,6 +181,7 @@ document.addEventListener('DOMContentLoaded', () => {
     displayRecipient.textContent = state.recipient;
     displaySender.textContent = 'Gửi trao từ: ' + state.sender;
     polaroidCaption.textContent = state.caption;
+    fitHeaderText();
     if (state.photoUrl) {
       recipientPhoto.src = state.photoUrl;
     }
