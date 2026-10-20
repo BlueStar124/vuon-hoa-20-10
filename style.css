@@ -412,6 +412,10 @@ body {
   will-change: transform, opacity;
 }
 
+.personalized-card .toolbar-container {
+  display: none;
+}
+
 .toolbar-glass {
   display: flex;
   align-items: center;

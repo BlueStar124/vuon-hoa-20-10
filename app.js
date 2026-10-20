@@ -89,6 +89,11 @@ document.addEventListener('DOMContentLoaded', () => {
   // ================= 1. XỬ LÝ URL PARAMETERS (TỰ ĐỘNG CÁ NHÂN HÓA CHO TỪNG NGƯỜI) =================
   function parseUrlParams() {
     const params = new URLSearchParams(window.location.search);
+    const isPersonalizedCard = params.has('card') ||
+      ['to', 'from', 'msg', 'wish', 'caption', 'photo', 'img', 'song', 'music']
+        .some((key) => params.has(key));
+
+    document.body.classList.toggle('personalized-card', isPersonalizedCard);
 
     // 1. Kiểm tra gói dữ liệu mã hóa Base64 ?card=...
     const cardData = params.get('card');
