@@ -43,9 +43,12 @@ class RomanticAudio {
     // Tự động chuyển fallback nếu định dạng webm không hỗ trợ trên trình duyệt cũ
     this.audioElement.addEventListener('error', () => {
       const track = this.playlist[this.currentTrack];
-      if (track && track.fallback && this.audioElement.src !== track.fallback) {
+      const fallbackSrc = track && track.fallback
+        ? new URL(track.fallback, document.baseURI).href
+        : '';
+      if (track && track.fallback && this.audioElement.src !== fallbackSrc) {
         console.log('Switching to audio fallback:', track.fallback);
-        this.audioElement.src = track.fallback;
+        this.audioElement.src = fallbackSrc;
         if (this.isPlaying) {
           this.audioElement.play().catch(e => console.log('Fallback play error:', e));
         }
