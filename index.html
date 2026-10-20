@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Vườn Hoa 20/10 - Dành Tặng Người Phụ Nữ Tuyệt Vời</title>
+  <meta name="description" content="Trang web vườn hoa nở rộ lãng mạn mừng ngày Phụ nữ Việt Nam 20/10, được lập trình với hiệu ứng động HTML5 Canvas tuyệt đẹp." />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Montserrat:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Playfair+Display:ital,wght@0,600;0,800;1,400&family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Canvas nền vẽ cả vườn hoa -->
+  <canvas id="gardenCanvas"></canvas>
+
+  <!-- Lớp phủ hiệu ứng ánh sáng & hạt bay -->
+  <div class="ambient-glow"></div>
+
+  <!-- Header thông điệp chính -->
+  <header class="header-container" id="headerContainer">
+    <div class="subtitle-badge">
+      <svg class="badge-sparkle" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+        <path d="M12 0L14.6 9.4L24 12L14.6 14.6L12 24L9.4 14.6L0 12L9.4 9.4L12 0Z"/>
+      </svg>
+      <span>20 THÁNG 10 • CHÚC MỪNG NGÀY PHỤ NỮ VIỆT NAM</span>
+      <svg class="badge-sparkle" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+        <path d="M12 0L14.6 9.4L24 12L14.6 14.6L12 24L9.4 14.6L0 12L9.4 9.4L12 0Z"/>
+      </svg>
+    </div>
+    <h1 class="main-title" id="mainTitle">
+      Dành tặng <span class="recipient-name" id="displayRecipient">Người Thương</span> cả một vườn hoa
+    </h1>
+    <p class="subtitle" id="subtitleText">Chạm vào màn hình để gieo thêm những đóa hoa rực rỡ</p>
+  </header>
+
+  <!-- Khung lời chúc lãng mạn kiểu Glassmorphism có Khung Ảnh Kỷ Niệm -->
+  <div class="wish-card" id="wishCard">
+    <div class="wish-card-glow"></div>
+    <div class="card-header">
+      <div class="tag">
+        <svg class="tag-flower-icon" viewBox="0 0 24 24" width="18" height="18" fill="none">
+          <circle cx="12" cy="12" r="3" fill="#ffd166"/>
+          <path d="M12 4C13.5 6.5 13.5 8.5 12 9C10.5 8.5 10.5 6.5 12 4Z" fill="#ff6b8b"/>
+          <path d="M12 20C13.5 17.5 13.5 15.5 12 15C10.5 15.5 10.5 17.5 12 20Z" fill="#ff6b8b"/>
+          <path d="M4 12C6.5 10.5 8.5 10.5 9 12C8.5 13.5 6.5 13.5 4 12Z" fill="#ff6b8b"/>
+          <path d="M20 12C17.5 10.5 15.5 10.5 15 12C15.5 13.5 17.5 13.5 20 12Z" fill="#ff6b8b"/>
+          <path d="M6.3 6.3C8.8 7.3 10 8.8 9.5 9.8C8.5 9.3 7 8.1 6.3 6.3Z" fill="#ffa8ba"/>
+          <path d="M17.7 17.7C15.2 16.7 14 15.2 14.5 14.2C15.5 14.7 17 15.9 17.7 17.7Z" fill="#ffa8ba"/>
+          <path d="M17.7 6.3C15.9 7 14.7 8.5 14.2 9.5C15.2 10 16.7 8.8 17.7 6.3Z" fill="#ffa8ba"/>
+          <path d="M6.3 17.7C8.1 17 9.3 15.5 9.8 14.5C8.8 14 7.3 15.2 6.3 17.7Z" fill="#ffa8ba"/>
+        </svg>
+        <span>Lời Chúc Yêu Thương</span>
+      </div>
+      <button class="minimize-btn" id="minimizeBtn" title="Thu gọn / Mở rộng" aria-label="Toggle card">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </button>
+    </div>
+
+    <div class="card-body" id="cardBody">
+      <div class="card-content-layout">
+        <!-- Khung ảnh Polaroid lãng mạn -->
+        <div class="polaroid-wrapper" id="polaroidWrapper" title="Bấm để đổi ảnh của bạn hoặc người thương">
+          <div class="polaroid-pin">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none">
+              <circle cx="12" cy="12" r="3.5" fill="#ffd166"/>
+              <circle cx="12" cy="5" r="3.2" fill="#ff6b8b"/>
+              <circle cx="12" cy="19" r="3.2" fill="#ff6b8b"/>
+              <circle cx="5" cy="12" r="3.2" fill="#ff6b8b"/>
+              <circle cx="19" cy="12" r="3.2" fill="#ff6b8b"/>
+              <circle cx="7" cy="7" r="2.8" fill="#ffa8ba"/>
+              <circle cx="17" cy="17" r="2.8" fill="#ffa8ba"/>
+              <circle cx="17" cy="7" r="2.8" fill="#ffa8ba"/>
+              <circle cx="7" cy="17" r="2.8" fill="#ffa8ba"/>
+            </svg>
+          </div>
+          <div class="polaroid-frame">
+            <img src="images/portrait.jpg" id="recipientPhoto" alt="Ảnh kỷ niệm 20/10" class="polaroid-img" />
+            <div class="photo-overlay">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                <circle cx="12" cy="13" r="4"/>
+              </svg>
+              <span>Đổi Ảnh</span>
+            </div>
+          </div>
+          <div class="polaroid-caption" id="polaroidCaption">Nụ cười tỏa nắng</div>
+          <input type="file" id="photoInput" accept="image/*" style="display: none;" />
+        </div>
+
+        <!-- Khung lời chúc đánh chữ typewriter -->
+        <div class="wish-text-wrapper">
+          <div class="typewriter-container">
+            <p class="wish-text" id="wishText"></p>
+            <span class="cursor">|</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="wish-footer">
+        <div class="sender-info">
+          <svg class="sender-heart-icon" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+          </svg>
+          <span class="signature" id="displaySender">Gửi trao từ: Chàng trai IT</span>
+        </div>
+        <div class="flower-counter">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#ff3366" stroke-width="2">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M12 3v3m0 12v3M3 12h3m12 0h3M5.6 5.6l2.1 2.1m8.6 8.6l2.1 2.1M5.6 18.4l2.1-2.1m8.6-8.6l2.1-2.1"/>
+          </svg>
+          <span>Đã nở:</span> <strong id="flowerCount">0</strong> đóa hoa
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Thanh công cụ điều khiển phía dưới -->
+  <footer class="toolbar-container">
+    <div class="toolbar-glass">
+      <!-- Cụm phát nhạc & đổi bài hát -->
+      <div class="audio-button-group">
+        <button class="tool-btn audio-btn" id="audioToggle" title="Bật/Tắt nhạc">
+          <span class="btn-icon" id="audioIcon">
+            <svg class="music-idle-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 18V5l12-2v13"/>
+              <circle cx="6" cy="18" r="3" fill="currentColor"/>
+              <circle cx="18" cy="16" r="3" fill="currentColor"/>
+            </svg>
+            <div class="equalizer-bars">
+              <span class="eq-bar bar-1"></span>
+              <span class="eq-bar bar-2"></span>
+              <span class="eq-bar bar-3"></span>
+              <span class="eq-bar bar-4"></span>
+            </div>
+          </span>
+          <span class="btn-label" id="audioLabel">Bật Nhạc</span>
+        </button>
+
+        <button class="tool-btn playlist-btn" id="playlistToggleBtn" title="Chọn bài hát lãng mạn">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <line x1="8" y1="6" x2="21" y2="6"></line>
+            <line x1="8" y1="12" x2="21" y2="12"></line>
+            <line x1="8" y1="18" x2="21" y2="18"></line>
+            <circle cx="3.5" cy="6" r="1.5" fill="currentColor"/>
+            <circle cx="3.5" cy="12" r="1.5" fill="currentColor"/>
+            <circle cx="3.5" cy="18" r="1.5" fill="currentColor"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Nút gieo thêm hoa -->
+      <button class="tool-btn bloom-btn" id="bloomMoreBtn" title="Gieo thêm cả cánh đồng hoa">
+        <span class="btn-icon">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2C8 7 4 9 4 13a8 8 0 0 0 16 0c0-4-4-6-8-11z" fill="rgba(255,255,255,0.25)"/>
+            <path d="M12 9v12m-4-7 4 3 4-3"/>
+            <circle cx="12" cy="7" r="1.5" fill="currentColor"/>
+          </svg>
+        </span>
+        <span class="btn-label">Thêm Hoa</span>
+      </button>
+
+      <!-- Nút chỉnh sửa tên, ảnh & lời chúc -->
+      <button class="tool-btn customize-btn" id="openModalBtn" title="Tùy biến tên, ảnh & lời chúc">
+        <span class="btn-icon">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="5" width="18" height="14" rx="3" stroke-width="2"/>
+            <path d="M3 7l9 6 9-6"/>
+            <path d="M12 11l-2-1.5m4 0l-2 1.5" stroke="#ff3366"/>
+          </svg>
+        </span>
+        <span class="btn-label">Đổi Lời Chúc</span>
+      </button>
+
+      <!-- Nút tạo & sao chép link tặng riêng -->
+      <button class="tool-btn share-btn" id="shareToolbarBtn" title="Sao chép link tặng riêng người này">
+        <span class="btn-icon">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+          </svg>
+        </span>
+        <span class="btn-label">Tặng Link</span>
+      </button>
+
+      <!-- Nút chụp ảnh thiệp gửi đi -->
+      <button class="tool-btn capture-btn" id="captureBtn" title="Lưu ảnh vườn hoa kèm thiệp chúc mừng">
+        <span class="btn-icon">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+            <circle cx="12" cy="13" r="4" fill="rgba(255,100,140,0.15)"/>
+            <path d="M18 10h.01"/>
+          </svg>
+        </span>
+        <span class="btn-label">Tải Thiệp</span>
+      </button>
+
+      <!-- Nút xóa làm lại vườn hoa -->
+      <button class="tool-btn reset-btn" id="clearBtn" title="Làm mới lại cả vườn hoa">
+        <span class="btn-icon">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21.5 2v6h-6"/>
+            <path d="M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.19"/>
+            <path d="M12 12c1.5-2.5 3.5-3 5-2.5-0.5 2-1.5 3.5-5 2.5z" fill="currentColor"/>
+          </svg>
+        </span>
+        <span class="btn-label">Trồng Lại</span>
+      </button>
+    </div>
+
+    <!-- Hộp thoại danh sách bài hát Playlist Popup -->
+    <div class="playlist-popup" id="playlistPopup">
+      <div class="playlist-header">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#ff3366" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 18V5l12-2v13"/>
+          <circle cx="6" cy="18" r="3" fill="currentColor"/>
+          <circle cx="18" cy="16" r="3" fill="currentColor"/>
+        </svg>
+        <span>Chọn Nhạc Lãng Mạn</span>
+      </div>
+      <div class="playlist-items">
+        <!-- 1. BÀI HÁT CHÍNH: Stephen Sanchez - The Pool -->
+        <button class="playlist-item active" data-track="the_pool">
+          <span class="track-icon vector-icon">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#ff3366" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="rgba(255,51,102,0.18)"/>
+            </svg>
+          </span>
+          <div class="track-info">
+            <div class="track-title">Stephen Sanchez - The Pool</div>
+            <div class="track-sub">Bản tình ca acoustic ngọt ngào (Nhạc chính)</div>
+          </div>
+          <svg class="track-indicator" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#ff3366" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+        </button>
+
+        <!-- 2. Chopin - Nocturne -->
+        <button class="playlist-item" data-track="chopin">
+          <span class="track-icon vector-icon">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#b82d56" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="5" width="20" height="14" rx="3" fill="rgba(240,101,149,0.1)"/>
+              <path d="M6 5v7M10 5v7M14 5v7M18 5v7"/>
+            </svg>
+          </span>
+          <div class="track-info">
+            <div class="track-title">Chopin - Nocturne Op. 9 No. 2</div>
+            <div class="track-sub">Piano kinh điển, êm dịu & sâu lắng</div>
+          </div>
+          <svg class="track-indicator" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#ff3366" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+        </button>
+
+        <!-- 3. Debussy - Clair de Lune -->
+        <button class="playlist-item" data-track="clair">
+          <span class="track-icon vector-icon">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#7950f2" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" fill="rgba(121,80,242,0.12)"/>
+              <circle cx="18" cy="5" r="1" fill="#ffd166"/>
+            </svg>
+          </span>
+          <div class="track-info">
+            <div class="track-title">Debussy - Clair de Lune</div>
+            <div class="track-sub">Ánh trăng huyền ảo, da diết</div>
+          </div>
+          <svg class="track-indicator" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#ff3366" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+        </button>
+
+        <!-- 4. Hộp Nhạc Canon in D -->
+        <button class="playlist-item" data-track="synth">
+          <span class="track-icon vector-icon">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#f59f00" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" fill="rgba(255,209,102,0.15)"/>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+            </svg>
+          </span>
+          <div class="track-info">
+            <div class="track-title">Hộp Nhạc Canon in D</div>
+            <div class="track-sub">Giai điệu chuông thánh thót trong trẻo</div>
+          </div>
+          <svg class="track-indicator" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#ff3366" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+        </button>
+
+        <!-- 5. Tải nhạc từ máy của bạn -->
+        <label class="playlist-item upload-item" for="customAudioUpload">
+          <span class="track-icon vector-icon">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#059669" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z" fill="rgba(52,211,153,0.12)"/>
+              <path d="M12 11v6m-3-3l3-3 3 3"/>
+            </svg>
+          </span>
+          <div class="track-info">
+            <div class="track-title" id="customTrackTitle">Tải nhạc từ máy của bạn...</div>
+            <div class="track-sub">Hỗ trợ file .mp3, .ogg, .wav, .m4a</div>
+          </div>
+          <input type="file" id="customAudioUpload" accept="audio/*" style="display: none;" />
+        </label>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Modal Tùy biến thông điệp & Tên người nhận -->
+  <div class="modal-backdrop" id="customModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#ff3366" stroke-width="2">
+            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="rgba(255,51,102,0.15)"/>
+          </svg>
+          <h3>Tùy Chỉnh Lời Chúc 20/10</h3>
+        </div>
+        <button class="close-modal-btn" id="closeModalBtn" aria-label="Close modal">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <label for="inputRecipient">Người nhận (VD: Em yêu, Chị gái, Mẹ yêu, Bạn thân...):</label>
+        <input type="text" id="inputRecipient" placeholder="Nhập tên người nhận..." maxlength="40" />
+
+        <label for="inputSender">Người gửi (VD: Chàng trai IT, Anh, Người thầm thương...):</label>
+        <input type="text" id="inputSender" placeholder="Nhập tên của bạn..." maxlength="40" />
+
+        <label for="inputCaption">Chú thích khung ảnh:</label>
+        <input type="text" id="inputCaption" placeholder="VD: Nụ cười tỏa nắng..." maxlength="35" />
+
+        <label for="inputPhotoUrl">Link ảnh online (tùy chọn, để gửi kèm ảnh qua link):</label>
+        <input type="url" id="inputPhotoUrl" placeholder="Dán link ảnh (https://...) để người nhận thấy được ngay" />
+
+        <label for="inputWish">Lời chúc yêu thương:</label>
+        <textarea id="inputWish" rows="4" placeholder="Nhập lời chúc chân thành của bạn..."></textarea>
+
+        <div class="quick-wishes">
+          <span>Gợi ý mẫu lời chúc nhanh:</span>
+          <div class="tag-list">
+            <button class="quick-tag" data-tag="crush">Tặng Crush / Người Yêu</button>
+            <button class="quick-tag" data-tag="colleague">Tặng Đồng Nghiệp Nữ</button>
+            <button class="quick-tag" data-tag="mom">Tặng Mẹ Yêu</button>
+            <button class="quick-tag" data-tag="sister">Tặng Chị / Em Gái</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-secondary" id="cancelModalBtn">Đóng</button>
+        <button class="btn-share" id="copyShareLinkBtn" title="Tạo link chứa tên & lời chúc riêng để gửi cho người này">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+          </svg>
+          <span>Chép Link Tặng Riêng 🔗</span>
+        </button>
+        <button class="btn-primary" id="saveModalBtn">
+          <span>Xem Thử Ngay</span>
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast thông báo nhỏ -->
+  <div class="toast-notification" id="toastNotification">Đã cập nhật lời chúc thành công!</div>
+
+  <!-- Audio Player & Logic Scripts -->
+  <script src="audio.js"></script>
+  <script src="garden.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
