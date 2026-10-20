@@ -8,6 +8,7 @@ class RomanticAudio {
   constructor() {
     this.audioElement = new Audio();
     this.audioElement.loop = true;
+    this.audioElement.preload = 'none';
     this.audioElement.volume = 0.8;
     this.isPlaying = false;
     this.currentTrack = 'the_pool'; // Đặt "The Pool" làm nhạc chính mặc định

@@ -20,6 +20,7 @@ class FlowerGarden {
 
     this.wind = 0;
     this.time = 0;
+    this.lastFrameTime = 0;
     this.mouse = { x: -1000, y: -1000 };
 
     // Bảng màu hoa rực rỡ pastel lãng mạn
@@ -62,6 +63,12 @@ class FlowerGarden {
     }, { passive: true });
 
     this.canvas.addEventListener('pointerdown', (e) => this.handlePointer(e));
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) {
+        this.lastFrameTime = performance.now();
+        requestAnimationFrame(this.animate);
+      }
+    });
 
     this.initGrass();
     this.initButterflies();
@@ -72,11 +79,35 @@ class FlowerGarden {
   }
 
   resize() {
+    const previousWidth = this.width;
+    const previousHeight = this.height;
     this.isMobile = window.innerWidth < 768;
-    // Cực kỳ sắc nét nhưng tối ưu triệt để: mobile dùng max 1.25 DPR để mát máy, desktop dùng 1.5 DPR
-    this.dpr = Math.min(window.devicePixelRatio || 1, this.isMobile ? 1.25 : 1.5);
+    const hardwareCores = navigator.hardwareConcurrency || 4;
+    const deviceMemory = navigator.deviceMemory || 4;
+    this.isLowEndDevice = this.isMobile && (hardwareCores <= 4 || deviceMemory <= 4);
+    this.dpr = Math.min(window.devicePixelRatio || 1, this.isMobile ? (this.isLowEndDevice ? 1 : 1.25) : 1.5);
+    this.frameInterval = this.isMobile ? (this.isLowEndDevice ? 1000 / 24 : 1000 / 30) : 1000 / 60;
     this.width = window.innerWidth;
     this.height = window.innerHeight;
+
+    if (previousWidth && previousHeight) {
+      const widthScale = this.width / previousWidth;
+      const heightScale = this.height / previousHeight;
+      this.flowers.forEach((flower) => {
+        flower.x *= widthScale;
+        flower.baseY = this.height + 15;
+        flower.targetHeight *= heightScale;
+        flower.currentHeight *= heightScale;
+      });
+      this.petals.forEach((petal) => {
+        petal.x *= widthScale;
+        petal.y *= heightScale;
+      });
+      this.particles.forEach((particle) => {
+        particle.x *= widthScale;
+        particle.y *= heightScale;
+      });
+    }
 
     this.canvas.width = Math.floor(this.width * this.dpr);
     this.canvas.height = Math.floor(this.height * this.dpr);
@@ -162,14 +193,17 @@ class FlowerGarden {
 
   seedInitialGarden() {
     this.flowers = [];
-    // Mobile: 10 - 12 hoa vừa vặn tuyệt đẹp, không bị đè che nhau; Desktop: 16 - 24 hoa
+    // Tăng mật độ hoa trên mobile, đồng thời dùng đầu hoa nhỏ hơn để giữ vườn thoáng.
     const numFlowers = this.isMobile 
-      ? Math.floor(Math.max(9, Math.min(13, this.width / 34)))
-      : Math.floor(Math.max(16, Math.min(26, this.width / 55)));
+      ? Math.floor(Math.max(12, Math.min(18, this.width / 25)))
+      : Math.floor(Math.max(18, Math.min(28, this.width / 50)));
 
     for (let i = 0; i < numFlowers; i++) {
-      const x = (i / (numFlowers - 1)) * (this.width * 0.94) + this.width * 0.03 + (Math.random() * 20 - 10);
-      const targetHeight = this.height * 0.32 + Math.random() * (this.height * (this.isMobile ? 0.35 : 0.4));
+      const x = (i / (numFlowers - 1)) * (this.width * 0.94) + this.width * 0.03 + (Math.random() * 12 - 6);
+      const lowerBloom = this.isMobile ? i % 3 !== 0 : i % 2 === 0;
+      const targetHeight = lowerBloom
+        ? this.height * (0.14 + Math.random() * 0.24)
+        : this.height * (0.36 + Math.random() * 0.32);
       const delay = i * 60 + Math.random() * 80;
       this.createFlower(x, targetHeight, delay);
     }
@@ -280,6 +314,15 @@ class FlowerGarden {
   }
 
   createFlower(x, targetHeight, delay = 0, isUserClick = false) {
+    const flowerLimit = this.isMobile ? (this.isLowEndDevice ? 24 : 32) : 64;
+    if (this.flowers.length >= flowerLimit) {
+      let oldestIndex = 0;
+      for (let i = 1; i < this.flowers.length; i++) {
+        if (this.flowers[i].bornAt < this.flowers[oldestIndex].bornAt) oldestIndex = i;
+      }
+      this.flowers.splice(oldestIndex, 1);
+    }
+
     const palette = this.colorPalettes[Math.floor(Math.random() * this.colorPalettes.length)];
     const types = ['rose', 'peony', 'cosmos', 'tulip'];
     const type = types[Math.floor(Math.random() * types.length)];
@@ -292,16 +335,16 @@ class FlowerGarden {
       growth: 0,
       bloomProgress: 0,
       delay: delay,
-      maxPetalSize: 30 + Math.random() * 32,
+      maxPetalSize: this.isMobile ? 24 + Math.random() * 18 : 28 + Math.random() * 26,
       palette: palette,
       type: type,
       swaySpeed: 0.02 + Math.random() * 0.015,
-      swayAmount: 10 + Math.random() * 14,
+      swayAmount: this.isMobile ? 6 + Math.random() * 8 : 10 + Math.random() * 14,
       phase: Math.random() * Math.PI * 2,
-      stemCurve: (Math.random() - 0.5) * 40,
+      stemCurve: (Math.random() - 0.5) * (this.isMobile ? 24 : 40),
       leaves: [
-        { heightRatio: 0.35, size: 22 + Math.random() * 12, side: -1, angle: 0.3 },
-        { heightRatio: 0.6, size: 24 + Math.random() * 12, side: 1, angle: -0.3 }
+        { heightRatio: 0.35, size: (this.isMobile ? 14 : 22) + Math.random() * (this.isMobile ? 8 : 12), side: -1, angle: 0.3 },
+        { heightRatio: 0.6, size: (this.isMobile ? 15 : 24) + Math.random() * (this.isMobile ? 8 : 12), side: 1, angle: -0.3 }
       ],
       petalsCount: type === 'cosmos' ? 8 : 5,
       bornAt: Date.now() + delay,
@@ -334,7 +377,7 @@ class FlowerGarden {
   bloomAll() {
     for (let i = 0; i < 8; i++) {
       const x = Math.random() * (this.width - 60) + 30;
-      const targetHeight = this.height * 0.35 + Math.random() * (this.height * 0.4);
+      const targetHeight = this.height * (0.14 + Math.random() * 0.54);
       this.createFlower(x, targetHeight, i * 50, true);
     }
   }
@@ -354,7 +397,9 @@ class FlowerGarden {
   }
 
   spawnSparks(x, y, color) {
-    for (let i = 0; i < 14; i++) {
+    const particleLimit = this.isLowEndDevice ? 24 : 48;
+    const sparkCount = Math.min(14, particleLimit - this.particles.length);
+    for (let i = 0; i < sparkCount; i++) {
       const angle = Math.random() * Math.PI * 2;
       const speed = 1.2 + Math.random() * 2.8;
       this.particles.push({
@@ -371,8 +416,11 @@ class FlowerGarden {
   }
 
   spawnAmbientParticles() {
-    // Giới hạn số hạt tối đa để đảm bảo 120 FPS
-    if (Math.random() < 0.15 && this.petals.length < 25) {
+    const delta = this.frameDelta || 1;
+    const maxPetals = this.isLowEndDevice ? 10 : 18;
+    const maxParticles = this.isLowEndDevice ? 14 : 24;
+
+    if (Math.random() < 0.15 * delta && this.petals.length < maxPetals) {
       this.petals.push({
         x: Math.random() * this.width,
         y: -15,
@@ -386,7 +434,7 @@ class FlowerGarden {
       });
     }
 
-    if (Math.random() < 0.15 && this.particles.length < 35) {
+    if (Math.random() < 0.15 * delta && this.particles.length < maxParticles) {
       this.particles.push({
         x: Math.random() * this.width,
         y: this.height * 0.85 - Math.random() * (this.height * 0.55),
@@ -402,8 +450,20 @@ class FlowerGarden {
 
   // ================= MAIN RENDER LOOP =================
 
-  animate() {
-    this.time += 0.02;
+  animate(timestamp = performance.now()) {
+    if (document.hidden) return;
+
+    if (this.lastFrameTime && timestamp - this.lastFrameTime < this.frameInterval) {
+      requestAnimationFrame(this.animate);
+      return;
+    }
+
+    const delta = this.lastFrameTime
+      ? Math.min((timestamp - this.lastFrameTime) / (1000 / 60), 2)
+      : 1;
+    this.lastFrameTime = timestamp;
+    this.frameDelta = delta;
+    this.time += 0.02 * delta;
     this.wind = Math.sin(this.time * 0.8) * 1.0 + Math.cos(this.time * 1.6) * 0.5;
 
     const ctx = this.ctx;
@@ -412,41 +472,46 @@ class FlowerGarden {
     ctx.drawImage(this.bgCanvas, 0, 0, this.width, this.height);
 
     // 2. Cánh hoa rơi
-    this.updateAndDrawPetals();
+    this.updateAndDrawPetals(delta);
 
-    // 3. Vẽ từng bông hoa (Dùng Cached Image cực mượt)
+    // 3. Vẽ thân và lá trước để các thân cây không che mất mặt hoa.
     const now = Date.now();
     for (let i = 0; i < this.flowers.length; i++) {
       const flower = this.flowers[i];
       if (now < flower.bornAt) continue;
 
-      this.updateFlower(flower);
-      this.drawFlower(flower);
+      this.updateFlower(flower, delta);
+      this.drawFlowerStem(flower);
     }
 
-    // 4. Vẽ thảm cỏ phía trước (Gom nhóm 3 stroke duy nhất)
+    // 4. Cỏ nằm trước thân nhưng sau đầu hoa để giữ các bông phía dưới rõ nét.
     this.drawForegroundGrassBatched();
 
+    for (let i = this.flowers.length - 1; i >= 0; i--) {
+      const flower = this.flowers[i];
+      if (now >= flower.bornAt) this.drawFlowerHead(flower);
+    }
+
     // 5. Bướm bay lượn
-    this.updateAndDrawButterflies();
+    this.updateAndDrawButterflies(delta);
 
     // 6. Hạt phấn hoa
     this.spawnAmbientParticles();
-    this.updateAndDrawParticles();
+    this.updateAndDrawParticles(delta);
 
     requestAnimationFrame(this.animate);
   }
 
-  updateFlower(flower) {
+  updateFlower(flower, delta = 1) {
     if (flower.growth < 1) {
-      flower.growth += 0.02;
+      flower.growth += 0.02 * delta;
       flower.currentHeight = flower.targetHeight * (1 - Math.pow(1 - flower.growth, 3));
     } else {
       flower.growth = 1;
       flower.currentHeight = flower.targetHeight;
 
       if (flower.bloomProgress < 1) {
-        flower.bloomProgress += 0.024;
+        flower.bloomProgress += 0.024 * delta;
         if (flower.bloomProgress >= 1) {
           flower.bloomProgress = 1;
           if (!flower.isFullyBloomed) {
@@ -457,7 +522,7 @@ class FlowerGarden {
     }
   }
 
-  drawFlower(flower) {
+  drawFlowerStem(flower) {
     const ctx = this.ctx;
     const sway = Math.sin(this.time + flower.phase) * flower.swayAmount * flower.growth + this.wind * 8;
 
@@ -474,13 +539,15 @@ class FlowerGarden {
     const cpY = flower.baseY - (flower.currentHeight * 0.55);
     const endX = flower.x + (sway * 1.05) + mouseInfluence;
     const endY = flower.baseY - flower.currentHeight;
+    flower.renderTipX = endX;
+    flower.renderTipY = endY;
 
     // Vẽ thân hoa
     ctx.beginPath();
     ctx.moveTo(startX, startY);
     ctx.quadraticCurveTo(cpX, cpY, endX, endY);
     ctx.strokeStyle = '#52b788';
-    ctx.lineWidth = 3.2;
+    ctx.lineWidth = this.isMobile ? 2 : 3.2;
     ctx.lineCap = 'round';
     ctx.stroke();
 
@@ -496,13 +563,18 @@ class FlowerGarden {
       }
     }
 
-    // Vẽ đầu bông hoa từ cache (SIÊU TỐC: 1 LỆNH DRAWIMAGE)
+  }
+
+  drawFlowerHead(flower) {
+    const ctx = this.ctx;
+
+    // Vẽ toàn bộ đầu hoa sau thân, lá và cỏ để giữ mặt hoa luôn rõ.
     if (flower.growth > 0.6 && flower.cachedCanvas) {
       const bloom = flower.bloomProgress;
       if (bloom > 0.05) {
         const offset = flower.cachedOffset;
         ctx.save();
-        ctx.translate(endX, endY);
+        ctx.translate(flower.renderTipX, flower.renderTipY);
         ctx.rotate(Math.sin(this.time + flower.phase) * 0.12);
         ctx.scale(bloom, bloom);
         ctx.drawImage(flower.cachedCanvas, -offset, -offset);
@@ -554,12 +626,12 @@ class FlowerGarden {
     }
   }
 
-  updateAndDrawButterflies() {
+  updateAndDrawButterflies(delta = 1) {
     const ctx = this.ctx;
     for (let b of this.butterflies) {
-      b.x += b.vx + Math.sin(this.time * 2) * 0.4;
-      b.y += b.vy + Math.cos(this.time * 2.5) * 0.5;
-      b.wingAngle += 0.28;
+      b.x += (b.vx + Math.sin(this.time * 2) * 0.4) * delta;
+      b.y += (b.vy + Math.cos(this.time * 2.5) * 0.5) * delta;
+      b.wingAngle += 0.28 * delta;
 
       if (b.x < -20) b.x = this.width + 10;
       if (b.x > this.width + 20) b.x = -10;
@@ -583,13 +655,13 @@ class FlowerGarden {
     }
   }
 
-  updateAndDrawPetals() {
+  updateAndDrawPetals(delta = 1) {
     const ctx = this.ctx;
     for (let i = this.petals.length - 1; i >= 0; i--) {
       const p = this.petals[i];
-      p.x += p.vx + this.wind * 0.6;
-      p.y += p.vy;
-      p.rotation += p.rotSpeed;
+      p.x += (p.vx + this.wind * 0.6) * delta;
+      p.y += p.vy * delta;
+      p.rotation += p.rotSpeed * delta;
 
       ctx.save();
       ctx.translate(p.x, p.y);
@@ -609,13 +681,13 @@ class FlowerGarden {
     ctx.globalAlpha = 1;
   }
 
-  updateAndDrawParticles() {
+  updateAndDrawParticles(delta = 1) {
     const ctx = this.ctx;
     for (let i = this.particles.length - 1; i >= 0; i--) {
       const p = this.particles[i];
-      p.x += p.vx;
-      p.y += p.vy;
-      p.alpha -= p.decay;
+      p.x += p.vx * delta;
+      p.y += p.vy * delta;
+      p.alpha -= p.decay * delta;
 
       if (p.alpha <= 0) {
         this.particles.splice(i, 1);
